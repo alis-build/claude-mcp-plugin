@@ -45,9 +45,10 @@ Everything goes through the Alis MCP server; a skill is published from its files
    - Optionally `references/<topic>.md` for a scrubbed worked example.
    - **Code is not a reference.** If the practice needs a buildable foundation (a
      template tree, a Dockerfile, Terraform, a server), say that it belongs in a code
-     block published from the source service (`alis blocks create`, see
-     `alis docs codeblocks` where the CLI is installed), with this skill pointing to
-     it, rather than files for agents to copy by hand.
+     block published from the source service, with this skill pointing to it, rather
+     than files for agents to copy by hand; offer to ask a specialist how to publish
+     one.
+   - Write each step in terms of the Alis MCP tools that do it, where one exists.
 
 4. **Review with the person.** Show the front matter and the step headings (not the
    whole file), plus a sample prompt the skill answers. Iterate on their comments.

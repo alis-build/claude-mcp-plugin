@@ -41,9 +41,11 @@ discovery, and no narration when nothing fits.
    skill's owner with `send_skill_feedback` (`rating` up or down, their words as
    `feedback`); if they don't, drop it. Skills improve from what their users say.
 
-6. **When a skill's step needs something this session cannot do** (for example an
-   `alis` CLI command on a machine without the CLI), say which step and the exact
-   command, and carry on with the steps that can be done here.
+6. **Run every step through the MCP tools.** A skill may give a step as an `alis`
+   command, written for a command line this plugin does not use: look for an MCP tool
+   that does the same and use it. When none does yet, say which step remains and what
+   it needs, offer to ask a specialist (`alisx:specialist`), and carry on with the
+   steps that can be done here.
 
 ## Rules
 

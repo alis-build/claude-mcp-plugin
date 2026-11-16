@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.2] - 2026-11-16
+
+- Everything happens through the Alis MCP server's tools; the plugin no longer refers to the
+  `alis` CLI. When a step has no tool yet (Define, Build, Deploy, packages, deployment
+  environments), Claude names the step and what it needs and offers to ask a specialist,
+  instead of giving a command. A Skill store skill that gives a step as an `alis` command is
+  followed through the matching MCP tool, or the step goes to a specialist.
+- `alisx-hooks` 0.2.1 no longer tells Claude whether the CLI is installed or suggests its
+  plugin.
+
 ## [0.2.1] - 2026-11-16
 
 - Every skill and command works in Claude Chat, which has no files or shell: `alisx:dbd`

@@ -7,18 +7,13 @@
 #      ~/alis.build workspace, or a Go module that uses Alis-defined packages.
 #      Elsewhere, and on resume, compact and fork (which already carried the
 #      primer once), the short digest (context/digest.md).
-#   2. Whether the alis CLI is on this machine, which decides how the steps the
-#      MCP server does not cover yet are run (the primer says both ways).
-#   3. Inside an ~/alis.build/<org>/{build,define}/... service folder, the
+#   2. Inside an ~/alis.build/<org>/{build,define}/... service folder, the
 #      package id and where its other half (contract or implementation) lives.
 #
 # ALIS_PRIMER=full|digest|off overrides the choice in 1, as in the alis CLI's
 # own plugin. When that plugin (alis@alis) is enabled it injects its CLI primer
 # itself, and this hook says only that the MCP server is here too.
 #
-# On a machine with the alis CLI but without its plugin, the first session is
-# told once that the CLI plugin adds Define/Build/Deploy (the counterpart of
-# that plugin's check-cli.sh).
 set -u
 
 case $0 in */*) hook_dir=${0%/*} ;; *) hook_dir=. ;; esac
@@ -63,18 +58,9 @@ if [ "$want" != off ]; then
   [ "$want" = digest ] && [ -f "$ctx_dir/digest.md" ] && primer="$ctx_dir/digest.md"
   [ -f "$primer" ] && context="$(cat "$primer")"
 
-  # 2. The CLI, as a fact.
-  if has_cli; then
-    cli_fact="The alis CLI is on this machine: steps no MCP tool covers yet run through it."
-  else
-    cli_fact="The alis CLI is not on this machine: name a step no MCP tool covers yet and its command, never improvise it."
-  fi
-  context="$context
-
-$cli_fact"
 fi
 
-# 3. The service this session opened in, from the workspace layout:
+# 2. The service this session opened in, from the workspace layout:
 #    build  = <root>/alis.build/<org>/build/<path...>
 #    define = <root>/alis.build/<org>/define/<org>/<path...>
 #    package id = <org>.<path with / as .> up to the vN segment.
@@ -137,13 +123,6 @@ svc="$(service_context 2>/dev/null || true)"
 
 }$svc"
 
-# Said once per install, not every session.
-notice=""
-if [ "$source_" = startup ] && has_cli && d="$(state_dir)" && [ ! -e "$d/cli-plugin-noticed" ]; then
-  notice="AlisX: the alis CLI is installed here. For Define, Build and Deploy from Claude Code, add its plugin too: claude plugin marketplace add alis-build/claude-plugin, then claude plugin install alis@alis. AlisX then steps aside for the primer and routing."
-  : > "$d/cli-plugin-noticed" 2>/dev/null || true
-fi
-
-[ -n "$context" ] || [ -n "$notice" ] || exit 0
-emit "$context" "$notice"
+[ -n "$context" ] || exit 0
+emit "$context"
 exit 0

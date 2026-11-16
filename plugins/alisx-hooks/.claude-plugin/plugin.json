@@ -1,7 +1,7 @@
 {
   "name": "alisx-hooks",
   "displayName": "AlisX hooks",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Claude Code hooks for the AlisX plugin: Alis Build session context, wake-word routing, a gate on destructive Alis Build calls, secret warnings and skill feedback prompts.",
   "author": {
     "name": "AlisX",
@@ -10,6 +10,12 @@
   "homepage": "https://github.com/alis-build/claude-mcp-plugin",
   "repository": "https://github.com/alis-build/claude-mcp-plugin",
   "license": "MIT",
-  "keywords": ["alis", "alisx", "hooks"],
-  "dependencies": ["alisx"]
+  "keywords": [
+    "alis",
+    "alisx",
+    "hooks"
+  ],
+  "dependencies": [
+    "alisx"
+  ]
 }

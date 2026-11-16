@@ -2,8 +2,8 @@
 
 The AlisX plugin connects this session to Alis Build's MCP server
 (`plugin:alisx:alis`): the Skill store and the person's conversations with Alis Build
-specialists, with more of the `alis` CLI's capabilities being added. Prefer an MCP
-tool when one covers a step. The full primer is the `alisx:dbd` skill: read it before
+specialists, with tools for Define, Build and Deploy being added. Everything on the
+platform happens through these tools. The full primer is the `alisx:dbd` skill: read it before
 Alis Build work this session has not done yet.
 
 Define, Build, Deploy: contracts in `~/alis.build/<org>/define` pin to a pushed

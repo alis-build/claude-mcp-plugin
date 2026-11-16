@@ -4,42 +4,36 @@ description: >-
   How to work on the Alis Build platform: the Define, Build, Deploy workflow, where
   contracts and services live, how to reach the Skill store and specialists through
   the Alis MCP server, and what must never be done without the person. Read it once
-  per session before any Alis Build work: a session in an ~/alis.build workspace or
-  a Go module importing alis.build/ packages; .proto contracts or Define; building
-  or deploying a service; packages, Spanner, Pub/Sub, Terraform under infra/,
-  playground tests; or when the person mentions Alis Build, AlisX or alis. For the
-  task-specific skill, use alisx:discover after this one.
+  per session before any Alis Build work: Go code importing alis.build/ packages;
+  .proto contracts or Define; building or deploying a service; packages, Spanner,
+  Pub/Sub, Terraform under infra/, playground tests; or when the person mentions
+  Alis Build, AlisX or alis. For the task-specific skill, use alisx:discover after
+  this one.
 ---
 
 # Alis Build — Define, Build, Deploy (DBD)
 
 The AlisX plugin connects this session to Alis Build through its MCP server
-(`https://mcp.alisx.com`), signed in as the person. Its tools are the platform's own:
-today the Skill store and the person's conversations with Alis Build specialists,
-with more of what the `alis` CLI does being added. Prefer an MCP tool when one covers
-a step, and check the tool list before saying something cannot be done.
+(`https://mcp.alisx.com`), signed in as the person. **Everything on the platform
+happens through its tools.** Today they cover the Skill store and the person's
+conversations with Alis Build specialists; tools for Define, Build and Deploy are
+being added. Check the tool list before saying something cannot be done.
 
-This applies in Claude Chat, Cowork and Claude Code alike. Where the session has no
-files or shell (Chat), work from what the person says, pastes or uploads and from the
-MCP tools: ask for a file's contents or a command's output when you need it, and
-never claim to have read a file or run a command.
+Work from what the person says, pastes or uploads and from the MCP tools. Ask for a
+file's contents when you need it, and never claim to have read a file or run a
+command.
 
 The core workflow is **Define, Build, Deploy**. Frame Alis Build work in those steps
 and walk the person through them rather than handing over a disconnected checklist.
 
 ## Where the work lives
 
-Alis Build workspaces on the person's machine follow one layout:
-
-- build (implementation): `~/alis.build/<org>/build/<product>/<service>/<vN>/…`
-- define (contract): `~/alis.build/<org>/define/<org>/<product>/<service>/<vN>/…`
-- the package id is `<org>.<product>.<service>.<vN>`, the path segments up to `vN`
-  joined with dots (for example `acme.shop.orders.v1`).
-
-Use it to name the package id from a path the person gives, and to say where the
-other half lives (the `.proto` files on the define side, the implementation on the
-build side). Only a session that can see the files checks them on disk; otherwise
-ask the person for the package id or path when it matters.
+- A service has two halves: its contract (`.proto` files) in the build environment's
+  define repo, under `<org>/<product>/<service>/<vN>/`, and its implementation in the
+  product's build repo, under `<product>/<service>/<vN>/`.
+- Its package id is `<org>.<product>.<service>.<vN>` (for example
+  `acme.shop.orders.v1`). Name it from a path the person gives, and ask for it when
+  it matters and is not clear.
 
 ## Define — lock the API / platform contract
 
@@ -68,36 +62,23 @@ ask the person for the package id or path when it matters.
 - The runtime is the service's Terraform under `infra/`; the deployment environment
   comes from the product, never a guess.
 - Validate end to end with the generated playground, usually
-  `<neuron>/.playground/main_test.go` (hidden and git-ignored: search it with
-  `rg --hidden --no-ignore`).
+  `<neuron>/.playground/main_test.go` (hidden and git-ignored, so repo-wide searches
+  skip it by default).
 
 ## Steps no MCP tool covers yet
 
-Define, Build, Deploy, package installs and deployment environments run through the
-`alis` CLI until the server covers them. They run on the person's machine: in Chat
-(no shell) give the person the exact command to run, say what to look for in its
-output, and read the result when they paste it back. A session with a shell checks
-once whether the CLI is installed (`alis version`, as its own command).
-
-- **With the CLI:** `alis docs` and `alis <cmd> --help` are its source of truth.
-  Define: `alis define <pkg> --json --install`. Build:
-  `alis build <pkg> --json --deploy -e <env> --async`. Deploy:
-  `alis deploy <pkg> --version <version> -e <env> --json --async`. Packages:
-  `alis packages install|upgrade|add <pkg> --json`. Environments:
-  `alis environment list <org>.<product> --json`. One standalone `alis` command per
-  call, `alis --cwd /absolute/path …` instead of `cd … &&`, no pipes or redirects;
-  under `--json` stdout is one JSON object and stderr is progress. Never poll with
-  `sleep`: `alis operations wait <op> --json`. Exit code 4 means signed out
-  (`alis login`).
-- **Where it is not installed:** do not improvise these steps with gcloud, curl, hand-written registry
-  settings or Terraform applied by hand. Say which step remains and the exact `alis`
-  command for it, and that the person can run it where the CLI is installed or ask a
-  specialist. Code, contracts and infra changes can still be written here.
+When a step has no MCP tool yet (today: Define, Build, Deploy, package installs and
+deployment environments), say so plainly: name the step and what it needs (package
+id, version, deployment environment). Do not invent a way around it: no gcloud,
+curl, hand-written registry settings or Terraform applied by hand, and no
+instructions for other tools. Offer to ask a specialist to carry it out or advise
+(`alisx:specialist`). Code, contracts and infra changes can still be written here
+for the person to commit. When a tool for the step appears in the tool list, use it.
 
 ## Never without the person
 
-- A production change needs the person's explicit approval every time
-  (`--confirm-production`, or a tool argument that targets production). A permission
+- A production change needs the person's explicit approval every time (a tool call
+  that targets production). A permission
   mode grants nothing, and a refusal means stop: never retry, reword or work around it.
 - Before `update_skill`, `restore_skill_version` or `delete_skill`, say what will
   change for everyone who uses the skill and wait for a yes in chat.

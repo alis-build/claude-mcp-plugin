@@ -23,8 +23,7 @@ Claude calls.
 - **Session start** (`session-start.sh`): adds the Define, Build, Deploy primer to
   the session, a copy of the `alisx:dbd` skill. You get the full primer inside an
   `~/alis.build` workspace or a Go module that uses Alis packages, and a short
-  digest elsewhere and after resume or compact. It also says whether the `alis` CLI is
-  on this machine. Inside a `~/alis.build/<org>/build|define/…` service folder, it adds
+  digest elsewhere and after resume or compact. Inside a `~/alis.build/<org>/build|define/…` service folder, it adds
   the package id and where the contract or implementation lives.
   `ALIS_PRIMER=full|digest|off` overrides the choice.
 - **Prompt routing** (`route-prompt.sh`): a prompt that starts with "alis, …" or
@@ -58,11 +57,9 @@ Claude calls.
 The `alis` CLI's own Claude Code plugin (`alis@alis`) runs Define, Build and Deploy
 from the terminal. When it is enabled, these hooks step aside for the primer, routing
 and secret warnings, and keep the permission gate. To tell whether it is enabled, they
-read the `enabledPlugins` entry for `alis@alis` in your Claude settings files. If the
-CLI is installed without its plugin, the first session says once how to add it.
+read the `enabledPlugins` entry for `alis@alis` in your Claude settings files.
 
 ## Kept locally
 
 Under the plugin's data folder: the hashes of reported secrets and the ids of skills
-already asked about (both removed after a day), and a marker that the CLI notice was
-shown.
+already asked about (both removed after a day).

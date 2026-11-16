@@ -6,9 +6,10 @@ platform's skills and carry on your conversations with Alis Build specialists. I
 skills teach Claude the Define, Build, Deploy workflow, how to pick the right skill
 for a task, how to save new work as a skill, and how to ask a specialist for help.
 
-The MCP server is growing to cover what the `alis` CLI does. Today it serves the
-Skill store and specialist conversations (21 tools); new tools appear in Claude as
-soon as the server offers them, with no plugin update.
+Everything happens through the MCP server's tools. Today they cover the Skill store
+and specialist conversations (21 tools); tools for Define, Build and Deploy are being
+added, and they appear in Claude as soon as the server offers them, with no plugin
+update.
 
 ## Install
 
@@ -40,9 +41,9 @@ all). Disconnect it from the same menu.
 ### Skills
 
 - **`alisx:dbd`**: how Alis Build works. It covers Define, Build and Deploy, where
-  contracts and services live and how a package id is formed. It also says which steps
-  still need the `alis` CLI and what Claude never does without you: production changes,
-  destructive skill changes, sending secrets.
+  contracts and services live and how a package id is formed. It also covers what
+  Claude does when no tool covers a step yet, and what it never does without you:
+  production changes, destructive skill changes, sending secrets.
 - **`alisx:discover`** finds the right Skill store skill for platform-shaped work
   (services, `.proto` contracts and Define, Spanner, Pub/Sub, Terraform under `infra/`,
   packages, playground tests, ADK agents, sharing a page) with `search_skills`. It loads
@@ -101,7 +102,7 @@ Alis Build's [privacy policy](https://alisx.com/privacy-policy/) and
 
 - **Alis tools missing, or asking to sign in:** sign in as above, then retry. In
   Claude Code, `/mcp` shows the server's state.
-- **A step needs the `alis` CLI:** Define, Build and Deploy run through the CLI until
-  the MCP server covers them. Without it, Claude names the step and the exact command
-  instead of improvising one.
+- **No tool for a step yet:** until the MCP server has tools for Define, Build and
+  Deploy, Claude names the step and what it needs, and offers to ask a specialist,
+  instead of improvising a way around it.
 - Support: [console.alisx.com/support](https://console.alisx.com/support).
