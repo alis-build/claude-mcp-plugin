@@ -6,21 +6,27 @@ today the Skill store and the person's conversations with Alis Build specialists
 with more of what the `alis` CLI does being added. Prefer an MCP tool when one covers
 a step, and check the tool list before saying something cannot be done.
 
+This applies in Claude Chat, Cowork and Claude Code alike. Where the session has no
+files or shell (Chat), work from what the person says, pastes or uploads and from the
+MCP tools: ask for a file's contents or a command's output when you need it, and
+never claim to have read a file or run a command.
+
 The core workflow is **Define, Build, Deploy**. Frame Alis Build work in those steps
 and walk the person through them rather than handing over a disconnected checklist.
 
-## Where the work is
+## Where the work lives
 
-Workspaces follow one layout:
+Alis Build workspaces on the person's machine follow one layout:
 
 - build (implementation): `~/alis.build/<org>/build/<product>/<service>/<vN>/…`
 - define (contract): `~/alis.build/<org>/define/<org>/<product>/<service>/<vN>/…`
 - the package id is `<org>.<product>.<service>.<vN>`, the path segments up to `vN`
   joined with dots (for example `acme.shop.orders.v1`).
 
-When the session is inside one half, name the package id and point at the other half
-(the `.proto` files on the define side, the implementation on the build side). Check
-on disk; say so when the other half is missing.
+Use it to name the package id from a path the person gives, and to say where the
+other half lives (the `.proto` files on the define side, the implementation on the
+build side). Only a session that can see the files checks them on disk; otherwise
+ask the person for the package id or path when it matters.
 
 ## Define — lock the API / platform contract
 
@@ -55,8 +61,10 @@ on disk; say so when the other half is missing.
 ## Steps no MCP tool covers yet
 
 Define, Build, Deploy, package installs and deployment environments run through the
-`alis` CLI until the server covers them. If this session has a shell, check once
-whether it is installed (`alis version`, as its own command).
+`alis` CLI until the server covers them. They run on the person's machine: in Chat
+(no shell) give the person the exact command to run, say what to look for in its
+output, and read the result when they paste it back. A session with a shell checks
+once whether the CLI is installed (`alis version`, as its own command).
 
 - **With the CLI:** `alis docs` and `alis <cmd> --help` are its source of truth.
   Define: `alis define <pkg> --json --install`. Build:
@@ -68,7 +76,7 @@ whether it is installed (`alis version`, as its own command).
   under `--json` stdout is one JSON object and stderr is progress. Never poll with
   `sleep`: `alis operations wait <op> --json`. Exit code 4 means signed out
   (`alis login`).
-- **Without it:** do not improvise these steps with gcloud, curl, hand-written registry
+- **Where it is not installed:** do not improvise these steps with gcloud, curl, hand-written registry
   settings or Terraform applied by hand. Say which step remains and the exact `alis`
   command for it, and that the person can run it where the CLI is installed or ask a
   specialist. Code, contracts and infra changes can still be written here.

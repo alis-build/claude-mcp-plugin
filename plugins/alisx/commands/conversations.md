@@ -2,7 +2,8 @@
 description: List your conversations with Alis Build specialists, and whose turn each is. Add a search to find an older one.
 ---
 
-Show the person's conversations with Alis Build specialists. Their words: $ARGUMENTS
+Show the person's conversations with Alis Build specialists. Go by what they said with this
+request, if anything (in Claude Code, the text after the command: $ARGUMENTS).
 
 - With no words: `list_conversations` (open ones). Show a short table: subject, id, state, whose
   turn, last activity. Put the ones waiting on the person first.

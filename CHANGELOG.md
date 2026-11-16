@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1] - 2026-11-16
+
+- Every skill and command works in Claude Chat, which has no files or shell: `alisx:dbd`
+  works from what the person says or pastes, gives CLI steps as commands for the person to run,
+  and checks files on disk only where the session can see them; `/alisx:status` checks only
+  the connection, the Skill store and conversations; commands no longer depend on `$ARGUMENTS`
+  being filled in.
+
 ## [0.2.0] - 2026-11-16
 
 The plugin directory accepts hooks and scripts only from Verified organizations, so the

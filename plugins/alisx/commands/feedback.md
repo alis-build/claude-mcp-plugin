@@ -2,7 +2,8 @@
 description: Send feedback on an Alis Build skill to its owner. Give the skill's id (optional) and your message.
 ---
 
-The person wants to send feedback on a Skill store skill. Their words: $ARGUMENTS
+The person wants to send feedback on a Skill store skill. Their words are what they said with
+this request (in Claude Code, the text after the command: $ARGUMENTS).
 
 1. **Which skill:** the id they named; otherwise the skill loaded with `load_skill` most recently
    in this session; otherwise ask which (offer `search_skills` if they don't know the id).

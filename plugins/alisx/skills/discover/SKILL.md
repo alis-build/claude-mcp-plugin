@@ -21,7 +21,7 @@ discovery, and no narration when nothing fits.
 ## Flow
 
 1. **Name the outcome.** Infer what the person wants done, in a sentence, from the
-   request and the workspace (the package id and folder the session started in).
+   request (and, where the session can see it, the package id and folder it is in).
 
 2. **Search once**: `search_skills` with that sentence as `query` and `limit` 5. The
    search goes by meaning; the results are the closest skills, not necessarily a fit.
