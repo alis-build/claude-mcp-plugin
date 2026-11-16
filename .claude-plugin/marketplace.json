@@ -1,0 +1,24 @@
+{
+  "name": "alisx",
+  "owner": {
+    "name": "AlisX"
+  },
+  "description": "AlisX plugins for Claude: Alis Build through its MCP server.",
+  "plugins": [
+    {
+      "name": "alisx",
+      "displayName": "AlisX",
+      "source": "./plugins/alisx",
+      "description": "Connect Claude to Alis Build through the Alis MCP server: the Skill store and your conversations with specialists.",
+      "version": "0.1.0",
+      "author": {
+        "name": "AlisX"
+      },
+      "homepage": "https://github.com/alis-build/claude-mcp-plugin",
+      "repository": "https://github.com/alis-build/claude-mcp-plugin",
+      "license": "MIT",
+      "keywords": ["alis", "alisx", "mcp", "skills", "deploys"],
+      "category": "developer-tools"
+    }
+  ]
+}

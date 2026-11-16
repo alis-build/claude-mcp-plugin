@@ -1,0 +1,23 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  checks:
+    strategy:
+      matrix:
+        # macOS runs the hooks under its bash 3.2 and BSD tools.
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release guard
+        run: tests/release-guard.sh
+      - name: Hook tests
+        run: tests/hooks-test.sh
+      - name: Hook tests under the system bash
+        if: runner.os == 'macOS'
+        run: /bin/bash --version | head -1 && PATH="/bin:/usr/bin:$PATH" /bin/bash tests/hooks-test.sh

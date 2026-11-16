@@ -1,0 +1,27 @@
+{
+  "name": "alisx",
+  "displayName": "AlisX",
+  "version": "0.1.0",
+  "description": "Connect Claude to Alis Build: the AlisX Skill store and your conversations with Alis Build specialists through the Alis MCP server, with Define/Build/Deploy context, skill routing, a permission gate and secret warnings.",
+  "author": {
+    "name": "AlisX",
+    "url": "https://alisx.com"
+  },
+  "homepage": "https://github.com/alis-build/claude-mcp-plugin",
+  "repository": "https://github.com/alis-build/claude-mcp-plugin",
+  "documentationUrl": "https://github.com/alis-build/claude-mcp-plugin/blob/main/plugins/alisx/README.md",
+  "supportUrl": "https://console.alisx.com/support",
+  "privacyPolicyUrl": "https://alisx.com/privacy-policy/",
+  "termsOfServiceUrl": "https://alisx.com/terms-of-use/",
+  "license": "MIT",
+  "icon": "./assets/alis-mark.svg",
+  "keywords": [
+    "alis",
+    "alisx",
+    "alis-build",
+    "mcp",
+    "skills",
+    "deploys",
+    "protobuf"
+  ]
+}
