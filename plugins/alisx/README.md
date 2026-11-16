@@ -94,6 +94,11 @@ claude plugin install alisx-hooks@alisx
 - **Not sent:** your prompts, files on disk and the session transcript, except what
   Claude puts into a tool call. This plugin has no hooks or scripts; it runs nothing
   on your machine.
+- **Drawn in Claude:** Claude Code shows each tool's answer as words. Claude on the web
+  and Desktop may also draw some answers (a deploy, a list, a decision that waits on
+  you) as a small card under the tool call. The card is the MCP server's, runs in
+  Claude's sandbox, loads nothing but Claude's own font and sends nothing anywhere. A
+  button on it calls the same tools, signed in as you.
 
 Alis Build's [privacy policy](https://alisx.com/privacy-policy/) and
 [terms of use](https://alisx.com/terms-of-use/) apply to the service.

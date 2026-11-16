@@ -222,6 +222,10 @@ expect_contains "names the skill" "$c" "deploy-cloud-run"
 expect_eq "once per skill per session" "$(load s6 '{"skill":"deploy-cloud-run"}')" ""
 expect_eq "a continued read is the same skill" "$(load s7 '{"skill":"x-y","offset":12000}')" ""
 expect_eq "a refused load is not in use" "$(load s8 '{"skill":"nope"}' '{"isError":true}')" ""
+# What the server sends beside the words for a card Claude may draw (_meta) is
+# not the call's failure, whatever it tells of: a deploy that failed is a thing.
+c="$(load s9 '{"skill":"deploy-b"}' '{"content":[{"type":"text","text":"ok"}],"_meta":{"alisx/things":{"v":1,"things":[{"operation":{"kind":"DEPLOY","state":"FAILED","errorMessage":"no access"}}]}}}' | ctx)"
+expect_contains "what rides beside the words is not a failure" "$c" "send_skill_feedback"
 
 printf '%d passed, %d failed\n' "$pass" "$fail"
 [ "$fail" -eq 0 ]
