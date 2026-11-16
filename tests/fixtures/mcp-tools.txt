@@ -1,5 +1,5 @@
 # The Alis MCP server's tools (alis.os.mcp.v1), from the scopes map in tools.go.
-# Refreshed by scripts/sync-tools.sh; every name needs a rule in tool-policy.tsv.
+# Refreshed by scripts/sync-tools.sh; every name belongs in gate-tools.sh and its matcher.
 search_skills
 list_skills
 preview_skill

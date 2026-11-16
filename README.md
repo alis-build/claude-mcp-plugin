@@ -21,7 +21,7 @@ server in place of the CLI.
 | `inject-service-context.sh`: package id and counterpart folder | folded into `session-start.sh`, same layout rules |
 | `check-cli.sh`: one startup notice when the CLI needs upgrading | one notice per install when the CLI is present without its plugin |
 | `suggest-skills.sh`: wake words and Skill store match through `alis skills suggest --hook` | `route-prompt.sh`: wake words, capture phrases, `tickets/<id>`, plan mode; local matching only (see below) |
-| `allow-alis-cli.sh`: permission gate for `alis …` Bash commands | `gate-tools.sh` + `tool-policy.tsv`: permission gate for the MCP server's tools |
+| `allow-alis-cli.sh`: permission gate for `alis …` Bash commands | `gate-tools.sh`: asks before destructive MCP calls and refuses ones carrying secrets; unlike the CLI gate it never grants a call, which the plugin directory holds for review |
 | `warn-secrets.sh`: secret warnings after each tool call | `warn-secrets.sh`: the same kinds, in bash; also refuses secrets in calls to the MCP server |
 | `report-skill-load.sh` and the module's "how did it go" line | `note-skill.sh`: asks once after a loaded skill's work, sends with `send_skill_feedback` |
 | skills `discover`, `capture` (via `alis skills …`) | skills `discover`, `capture` (via the MCP tools), plus `specialist` |
@@ -43,7 +43,7 @@ needs a server tool that answers nothing below a confident match: today's
 | `.claude-plugin/marketplace.json` | The `alisx` marketplace, with the one plugin |
 | `plugins/alisx/.claude-plugin/plugin.json` | The plugin manifest |
 | `plugins/alisx/.mcp.json` | The Alis Build MCP server |
-| `plugins/alisx/hooks/` | `hooks.json`, the bash hooks, `lib.sh`, `tool-policy.tsv` |
+| `plugins/alisx/hooks/` | `hooks.json`, the bash hooks, `lib.sh`, and the secret patterns (data) |
 | `plugins/alisx/context/` | Primer, digest, and the CLI and no-CLI sections |
 | `plugins/alisx/skills/`, `commands/` | Skills and slash commands |
 | `tests/` | `hooks-test.sh`, `release-guard.sh`, `fixtures/mcp-tools.txt` |
@@ -53,14 +53,18 @@ needs a server tool that answers nothing below a confident match: today's
 
 The server ([alis.os.mcp.v1](https://github.com/alis-build/alis), `os/mcp/v1`) is
 growing towards everything the CLI does. Its new tools reach Claude without a plugin
-release, and the gate handles them by name until they get a rule. To give them one:
+release. Until the gate names them, Claude Code's own name for them falls back to
+name rules (deploy, delete, secrets: ask). To name them:
 
 1. `scripts/sync-tools.sh [path/to/os/mcp/v1]` refreshes `tests/fixtures/mcp-tools.txt`
    from the server's `scopes` map.
-2. Add a rule for each new tool to `plugins/alisx/hooks/tool-policy.tsv`, above the
-   fallbacks: `allow` for reads, `ask` for what the server marks destructive or what
-   touches production or secrets, `none` for other writes. The release guard fails until
-   every tool has one.
+2. Add each new tool to the `case` in `plugins/alisx/hooks/gate-tools.sh` (step 3:
+   no answer for reads and ordinary writes; a literal `ask` line for what the server
+   marks destructive or what touches production or secrets). Also add it to the
+   PreToolUse matcher in `hooks.json`, which picks the tool under any host's server name.
+   The release guard fails until every tool is in both. Keep the gate's answers literal
+   `echo` lines with no `printf`, no sourced files and never `allow`: the plugin
+   directory reads the gate statically.
 3. When a tool replaces a CLI step, update `context/primer.md` and the skills so that
    Claude prefers it, and `context/no-cli.md` so the step is no longer listed as needing
    the CLI.

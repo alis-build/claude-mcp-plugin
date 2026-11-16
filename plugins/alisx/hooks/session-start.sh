@@ -20,7 +20,7 @@
 # that plugin's check-cli.sh).
 set -u
 
-hook_dir=$(cd "$(dirname "$0")" && pwd)
+case $0 in */*) hook_dir=${0%/*} ;; *) hook_dir=. ;; esac
 . "$hook_dir/lib.sh"
 ctx_dir="$hook_dir/../context"
 

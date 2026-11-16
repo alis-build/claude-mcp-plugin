@@ -29,10 +29,11 @@ cp -P "$nocli"/* "$withcli"/
 printf '#!/bin/sh\nexit 0\n' > "$withcli/alis"; chmod +x "$withcli/alis"
 
 # run HOOK PATH_DIR PROJECT_DIR [VAR=value...] < event
+# As hooks.json runs it: bash "${CLAUDE_PLUGIN_ROOT}/hooks/<hook>".
 run() {
   local hook="$1" bin="$2" proj="$3"; shift 3
   env -i HOME="$tmp/home" PATH="$bin" CLAUDE_PLUGIN_ROOT="$plugin" \
-    CLAUDE_PLUGIN_DATA="$tmp/data" CLAUDE_PROJECT_DIR="$proj" "$@" "$hooks/$hook"
+    CLAUDE_PLUGIN_DATA="$tmp/data" CLAUDE_PROJECT_DIR="$proj" "$@" bash "$hooks/$hook"
 }
 ctx()     { jq -r '.hookSpecificOutput.additionalContext // empty'; }
 decides() { jq -r '.hookSpecificOutput.permissionDecision // empty'; }
@@ -140,34 +141,54 @@ rm -f "$tmp/home/.claude/settings.json"
 
 # --- PreToolUse gate -------------------------------------------------------
 
-gate() {  # gate TOOL INPUT_JSON -> the whole answer
-  printf '{"session_id":"s1","hook_event_name":"PreToolUse","tool_name":"mcp__plugin_alisx_alis__%s","tool_input":%s,"tool_use_id":"t1"}' "$1" "$2" \
+gate() {  # gate TOOL INPUT_JSON [SERVER_PREFIX] -> the whole answer
+  printf '{"session_id":"s1","hook_event_name":"PreToolUse","tool_name":"%s%s","tool_input":%s,"tool_use_id":"t1"}' "${3:-mcp__plugin_alisx_alis__}" "$1" "$2" \
     | run gate-tools.sh "$nocli" "$tmp/plain"
 }
 while IFS= read -r t; do
   case "$t" in ''|'#'*) continue ;; esac
-  d="$(gate "$t" '{}' | decides)"
-  case "$d" in allow|ask|"") ok ;; *) bad "gate answers $t with a known decision" "$d" ;; esac
+  a="$(gate "$t" '{}')"
+  d="$(printf '%s' "$a" | decides)"
+  case "$d" in ask|"") ok ;; *) bad "gate answers $t with ask or nothing" "$a" ;; esac
+  [ -z "$a" ] || printf '%s' "$a" | jq -e . >/dev/null 2>&1 && ok || bad "gate answers $t with valid JSON" "$a"
 done < "$repo/tests/fixtures/mcp-tools.txt"
-expect_eq "read: search_skills runs" "$(gate search_skills '{"query":"deploy a service"}' | decides)" allow
-expect_eq "read: wait_for_reply runs" "$(gate wait_for_reply '{"conversation":"tickets/1"}' | decides)" allow
+expect_eq "read: search_skills keeps Claude's handling" "$(gate search_skills '{"query":"deploy a service"}')" ""
+expect_eq "read: wait_for_reply keeps Claude's handling" "$(gate wait_for_reply '{"conversation":"tickets/1"}')" ""
 expect_eq "destructive: delete_skill asks" "$(gate delete_skill '{"skill":"x"}' | decides)" ask
 expect_eq "destructive: update_skill asks" "$(gate update_skill '{"skill":"x","summary":"y"}' | decides)" ask
+expect_eq "destructive under another host's server name asks" "$(gate delete_skill '{"skill":"x"}' mcp__Alis_Build__ | decides)" ask
 expect_eq "write: send_message keeps Claude's handling" "$(gate send_message '{"conversation":"tickets/1","message":"hi"}')" ""
 expect_eq "unknown future write: no answer" "$(gate create_build '{"package":"a.b.c.v1"}')" ""
-expect_eq "future read: allowed by the fallback" "$(gate list_operations '{}' | decides)" allow
+expect_eq "future read: no answer" "$(gate list_operations '{}')" ""
 expect_eq "future deploy: asks" "$(gate deploy_version '{"version":"1.2.3"}' | decides)" ask
 expect_eq "future secret read: asks" "$(gate list_environment_secrets '{}' | decides)" ask
+expect_eq "future tools on another server: no answer" "$(gate deploy_version '{}' mcp__other__)" ""
 expect_eq "production flag asks even on a read" "$(gate get_deployment '{"confirm_production":true}' | decides)" ask
 expect_eq "reveal asks" "$(gate list_environment_variables '{"reveal": true}' | decides)" ask
-expect_eq "reveal false is a read" "$(gate list_environment_variables '{"reveal":false}' | decides)" allow
+expect_eq "reveal false: no answer" "$(gate list_environment_variables '{"reveal":false}')" ""
+expect_eq "force asks" "$(gate update_build '{"force":true}' | decides)" ask
 a="$(gate start_conversation '{"message":"my key is AKIAQWERTYUIOPASDFGHJ ok"}')"
 expect_eq "a secret in the arguments is refused" "$(printf '%s' "$a" | decides)" deny
-expect_contains "the refusal names the kind" "$a" "AWS access key"
 expect_absent "the refusal never repeats the value" "$a" "AKIAQWERTYUIOPASDFGHJ"
+expect_eq "a secret is refused under another host's name too" "$(gate send_message '{"message":"ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}' mcp__Alis_Build__ | decides)" deny
 expect_eq "an example key is not a secret" "$(gate send_message '{"message":"e.g. AKIAIOSFODNN7EXAMPLE"}')" ""
 out="$(printf '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | run gate-tools.sh "$nocli" "$tmp/plain")"
 expect_eq "other tools are not gated" "$out" ""
+# What the directory reads: the gate never answers allow, and prints no
+# generated JSON.
+gate_src="$(cat "$hooks/gate-tools.sh")"
+expect_absent "the gate never allows" "$gate_src" '"allow"'
+expect_absent "the gate uses no printf" "$gate_src" "printf"
+expect_absent "the gate sources nothing" "$(grep -E '^[[:space:]]*(\.|source)[[:space:]]' "$hooks/gate-tools.sh")" "lib.sh"
+
+# The matcher in hooks.json picks the same calls the gate reads.
+matcher="$(jq -r '.hooks.PreToolUse[0].matcher' "$plugin/hooks/hooks.json")"
+for name in mcp__plugin_alisx_alis__delete_skill mcp__plugin_alisx_alis__deploy_version mcp__Alis_Build__send_message; do
+  node -e 'process.exit(new RegExp(process.argv[1]).test(process.argv[2]) ? 0 : 1)' "$matcher" "$name" 2>/dev/null && ok || bad "matcher picks $name"
+done
+for name in mcp__other__deploy_version Bash mcp__plugin_alisx_alis_; do
+  node -e 'process.exit(new RegExp(process.argv[1]).test(process.argv[2]) ? 0 : 1)' "$matcher" "$name" 2>/dev/null && bad "matcher skips $name" || ok
+done
 
 # --- PostToolUse: secrets --------------------------------------------------
 

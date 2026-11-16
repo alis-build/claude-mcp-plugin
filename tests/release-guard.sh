@@ -24,36 +24,34 @@ url="$(jq -r '.mcpServers.alis.url' "$plugin/.mcp.json")"
 [ "$url" = "https://mcp.alisx.com" ] || no ".mcp.json: alis url is $url"
 [ "$(jq -r '.mcpServers.alis.type' "$plugin/.mcp.json")" = http ] || no ".mcp.json: alis type must be http"
 
-# 3. Hooks: valid JSON, every command a quoted plugin-relative executable, and
-#    every script parses.
+# 3. Hooks: valid JSON, every command `bash "${CLAUDE_PLUGIN_ROOT}/hooks/<x>.sh"`
+#    (the interpreter named, the path the plugin's own), and every script parses.
 jq -e '.hooks | type == "object"' "$plugin/hooks/hooks.json" >/dev/null || no "hooks.json has no hooks object"
 while IFS= read -r cmd; do
   case "$cmd" in
-    '"${CLAUDE_PLUGIN_ROOT}/'*'"') rel="${cmd#\"\$\{CLAUDE_PLUGIN_ROOT\}/}"; rel="${rel%\"}" ;;
-    *) no "hook command is not a quoted \${CLAUDE_PLUGIN_ROOT} path: $cmd"; continue ;;
+    'bash "${CLAUDE_PLUGIN_ROOT}/'*'"') rel="${cmd#bash \"\$\{CLAUDE_PLUGIN_ROOT\}/}"; rel="${rel%\"}" ;;
+    *) no "hook command is not bash \"\${CLAUDE_PLUGIN_ROOT}/...\": $cmd"; continue ;;
   esac
-  [ -x "$plugin/$rel" ] || no "hook script missing or not executable: $rel"
+  [ -f "$plugin/$rel" ] || no "hook script missing: $rel"
 done < <(jq -r '.hooks[][] | .hooks[] | .command' "$plugin/hooks/hooks.json")
 for f in "$plugin"/hooks/*.sh; do bash -n "$f" || no "$f does not parse"; done
-# The matchers name the plugin's own server: a rename must change them too.
 name="$(jq -r .name "$plugin/.claude-plugin/plugin.json")"
-grep -q "mcp__plugin_${name}_alis__" "$plugin/hooks/hooks.json" || no "hooks.json matchers do not name mcp__plugin_${name}_alis__"
-grep -q "ALISX_TOOL_PREFIX='mcp__plugin_${name}_alis__'" "$plugin/hooks/lib.sh" || no "lib.sh tool prefix does not match the plugin name"
+grep -q "plugin_${name}_alis__" "$plugin/hooks/hooks.json" || no "hooks.json matchers do not name plugin_${name}_alis__"
+grep -q "mcp__plugin_${name}_alis__" "$plugin/hooks/gate-tools.sh" || no "gate-tools.sh does not name mcp__plugin_${name}_alis__"
 
-# 4. Every tool the server serves has an explicit rule above the fallbacks.
-rules="$(sed '/^# --- fallbacks/,$d' "$plugin/hooks/tool-policy.tsv" | grep -v '^#' | grep -v '^$')"
+# 4. The gate is what the directory can read in full: it never answers allow,
+#    builds no JSON (no printf) and sources nothing. Every tool the server
+#    serves is named both in the gate and in its matcher.
+gate="$plugin/hooks/gate-tools.sh"
+! grep -q '"allow"' "$gate" || no "gate-tools.sh must never answer allow"
+! grep -q 'printf' "$gate" || no "gate-tools.sh must print literal JSON only (no printf)"
+! grep -qE '^[[:space:]]*(\.|source)[[:space:]]' "$gate" || no "gate-tools.sh must not source other files"
+matcher="$(jq -r '.hooks.PreToolUse[0].matcher' "$plugin/hooks/hooks.json")"
 while IFS= read -r t; do
   case "$t" in ''|'#'*) continue ;; esac
-  matched=0
-  while IFS='	' read -r pattern decision _; do
-    [[ $t =~ $pattern ]] && { matched=1; break; }
-  done <<EOF
-$rules
-EOF
-  [ "$matched" -eq 1 ] || no "tool $t has no rule in tool-policy.tsv (above the fallbacks)"
+  sed '/^# 4\./,$d' "$gate" | grep -v '^[[:space:]]*#' | grep -qw -- "$t" || no "tool $t is not named in gate-tools.sh"
+  printf '%s' "$matcher" | grep -qw -- "$t" || no "tool $t is not in the PreToolUse matcher"
 done < "$repo/tests/fixtures/mcp-tools.txt"
-awk -F'\t' '!/^#/ && NF { if ($2 != "allow" && $2 != "ask" && $2 != "none") { print "bad decision: " $0; bad=1 } } END { exit bad }' \
-  "$plugin/hooks/tool-policy.tsv" || no "tool-policy.tsv has a decision other than allow, ask or none"
 
 # 5. What Chat and Cowork accept: no top-level bin/ (the whole plugin is
 #    refused), and skills and commands whose front matter is only what Chat

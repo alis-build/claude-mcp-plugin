@@ -13,7 +13,7 @@ set -u
 
 [ "${ALISX_SECRETS:-}" = off ] && exit 0
 
-hook_dir=$(cd "$(dirname "$0")" && pwd)
+case $0 in */*) hook_dir=${0%/*} ;; *) hook_dir=. ;; esac
 . "$hook_dir/lib.sh"
 
 payload="$(cat 2>/dev/null || true)"
@@ -38,9 +38,7 @@ while IFS='	' read -r kind value; do
   fi
   fresh="$fresh
 $kind"
-done <<EOF
-$hits
-EOF
+done <<< "$hits"
 
 kinds="$(printf '%s' "$fresh" | sed '/^$/d' | awk '!seen[$0]++' | paste -sd, - | sed 's/,/, /g')"
 [ -n "$kinds" ] || exit 0

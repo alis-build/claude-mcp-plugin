@@ -7,12 +7,14 @@
 # their users say.
 set -u
 
-hook_dir=$(cd "$(dirname "$0")" && pwd)
+case $0 in */*) hook_dir=${0%/*} ;; *) hook_dir=. ;; esac
 . "$hook_dir/lib.sh"
 
 payload="$(cat 2>/dev/null || true)"
 [ -n "$payload" ] || exit 0
-[ "$(field tool_name)" = "${ALISX_TOOL_PREFIX}load_skill" ] || exit 0
+# Hosts name the server differently; the tool is the end of the name.
+tool_name=$(field tool_name)
+case $tool_name in mcp__*__load_skill) ;; *) exit 0 ;; esac
 
 # A refused load has nothing in use.
 err_re='"is_?[Ee]rror"[[:space:]]*:[[:space:]]*true'

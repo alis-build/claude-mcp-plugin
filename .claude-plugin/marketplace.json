@@ -10,7 +10,7 @@
       "displayName": "AlisX",
       "source": "./plugins/alisx",
       "description": "Connect Claude to Alis Build through the Alis MCP server: the Skill store and your conversations with specialists.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "AlisX"
       },

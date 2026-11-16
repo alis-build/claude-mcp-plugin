@@ -6,10 +6,6 @@
 # (the terminal, the desktop app, cloud sessions, Cowork). Every failure path
 # is silent: a hook must never break a session.
 
-# The plugin's MCP server, as Claude Code names its tools:
-# mcp__plugin_<plugin>_<server>__<tool>.
-ALISX_TOOL_PREFIX='mcp__plugin_alisx_alis__'
-
 # json_escape TEXT: TEXT as the inside of a JSON string.
 json_escape() {
   local s=$1
@@ -94,45 +90,16 @@ session_file() {
 # Secrets
 #
 # secret_hits TEXT prints one "kind<TAB>value" line per secret-looking value
-# in TEXT, which may be JSON-escaped. The values are only ever hashed for
-# de-duplication; no hook prints one.
-
-SECRET_PATTERNS='Stripe key	(sk|rk)_(live|test)_[A-Za-z0-9]{16,}
-GitHub token	(gh[pousr]_[A-Za-z0-9]{36,}|github_pat_[A-Za-z0-9_]{40,})
-npm token	npm_[A-Za-z0-9]{36}
-PyPI token	pypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{40,}
-Linear key	lin_(api|oauth)_[A-Za-z0-9]{32,}
-SendGrid key	SG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}
-AWS access key	(AKIA|ASIA)[0-9A-Z]{16}
-Google API key	AIza[0-9A-Za-z_-]{35}
-Google OAuth secret	GOCSPX-[A-Za-z0-9_-]{28}
-Google access token	ya29\.[0-9A-Za-z_-]{30,}
-Slack token	xox[abposr]-[A-Za-z0-9-]{20,}
-Slack webhook	hooks\.slack\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]{20,}
-Anthropic key	sk-ant-[A-Za-z0-9_-]{30,}
-OpenAI key	sk-proj-[A-Za-z0-9_-]{30,}
-private key	-----BEGIN ([A-Z]+ )?PRIVATE KEY-----(\\n|[[:space:]])*[A-Za-z0-9+/=]{24}
-connection string password	[a-z][a-z0-9+.-]*://[^/:@[:space:]"\\]+:[^/@[:space:]"\\]{6,}@[A-Za-z0-9.-]+
-secret assignment	[A-Z][A-Z0-9_]*(SECRET|PASSWORD|PASSWD|TOKEN|API_KEY|APIKEY|PRIVATE_KEY|ACCESS_KEY)[A-Z0-9_]*[[:space:]]*[=:][[:space:]]*["'"'"']?[^[:space:]"'"'"'\\$<{]{8,}'
-
-# A value that is plainly a stand-in, not a secret.
-SECRET_PLACEHOLDER='(:(pass(word)?|secret|pwd|pw)@|EXAMPLE|[Ee]xample|xxxx|XXXX|\*\*\*|<[A-Za-z_]+>|\$\{|[Yy]our[_-]|changeme|CHANGEME|placeholder|PLACEHOLDER|REDACTED|redacted|dummy|DUMMY|0000000000)'
+# in TEXT, which may be JSON-escaped, from secret-patterns.tsv less the
+# stand-ins in secret-placeholders.txt. The values are only ever hashed for
+# de-duplication; no hook prints one. The caller sets hook_dir.
 
 secret_hits() {
-  local text=$1 kind re value
+  local text=$1 kind pattern value
   [ -n "$text" ] || return 0
-  while IFS='	' read -r kind re; do
-    [ -n "$re" ] || continue
-    printf '%s' "$text" | grep -oE -- "$re" 2>/dev/null | while IFS= read -r value; do
-      [[ $value =~ $SECRET_PLACEHOLDER ]] && continue
-      printf '%s\t%s\n' "$kind" "$value"
-    done
-  done <<EOF
-$SECRET_PATTERNS
-EOF
-}
-
-# secret_kinds TEXT: the distinct kinds secret_hits finds, comma-separated.
-secret_kinds() {
-  secret_hits "$1" | cut -f1 | awk '!seen[$0]++' | paste -sd, - | sed 's/,/, /g'
+  while IFS='	' read -r kind pattern; do
+    case $kind in ''|'#'*) continue ;; esac
+    grep -oE -e "$pattern" <<< "$text" | grep -vE -f "$hook_dir/secret-placeholders.txt" \
+      | while IFS= read -r value; do printf '%s\t%s\n' "$kind" "$value"; done
+  done < "$hook_dir/secret-patterns.tsv"
 }

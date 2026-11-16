@@ -1,7 +1,7 @@
 {
   "name": "alisx",
   "displayName": "AlisX",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Connect Claude to Alis Build: the AlisX Skill store and your conversations with Alis Build specialists through the Alis MCP server, with Define/Build/Deploy context, skill routing, a permission gate and secret warnings.",
   "author": {
     "name": "AlisX",

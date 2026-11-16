@@ -98,16 +98,16 @@ Claude calls (see below).
   skill" goes to `alisx:capture`. A `tickets/<id>` reference is read before
   anything is proposed. In plan mode on platform work, Claude searches the Skill
   store once. The matching is local, and other prompts get nothing.
-- **Permission gate** (`gate-tools.sh`, rules in `tool-policy.tsv`): the server makes
-  every tool a read or a write. Reads (search, list, load, read and wait tools) run
-  without a prompt. Writes the server marks destructive (`update_skill`,
+- **Permission gate** (`gate-tools.sh`): this hook only ever asks you or refuses a
+  call; it never grants one. Writes the server marks destructive (`update_skill`,
   `restore_skill_version`, `delete_skill`) always ask you, in every permission mode.
-  Other writes, such as sending a message or creating a skill, keep Claude's normal
-  permission prompt. Any call whose arguments ask for production, a reveal or an
-  override also asks. A call whose arguments carry a secret-looking value is refused,
-  so Claude takes the value out before anything is sent. New server tools follow
-  rules by name: reads run, anything that deploys, deletes or touches secrets asks,
-  and the rest keeps Claude's normal prompt.
+  So does any call whose arguments ask for production, a reveal or a forced change.
+  A call whose arguments carry a secret-looking value is refused, so Claude takes the
+  value out before anything is sent. In Claude Code, a tool the server adds later asks
+  you when its name says it deploys, removes or touches secrets. Everything else,
+  reads included, keeps Claude's normal permission prompt. To stop being asked about
+  reads, choose "always allow" when Claude asks, or add the read tools to
+  `permissions.allow` in your settings.
 - **Secret warnings** (`warn-secrets.sh`): after each tool call, the result and
   arguments are checked for secret-looking values. These include Stripe, GitHub, npm,
   PyPI, Linear, SendGrid, AWS, Google, Slack, Anthropic and OpenAI keys, private keys,

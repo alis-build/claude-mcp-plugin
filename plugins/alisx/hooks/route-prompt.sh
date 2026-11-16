@@ -12,7 +12,7 @@
 # plugin is enabled, it routes these phrases itself, so this hook steps aside.
 set -u
 
-hook_dir=$(cd "$(dirname "$0")" && pwd)
+case $0 in */*) hook_dir=${0%/*} ;; *) hook_dir=. ;; esac
 . "$hook_dir/lib.sh"
 
 payload="$(cat 2>/dev/null || true)"
