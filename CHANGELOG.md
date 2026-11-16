@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0] - 2026-11-16
+
+The plugin directory accepts hooks and scripts only from Verified organizations, so the
+plugin is split in two.
+
+- `alisx` (the directory plugin) now ships only the MCP server, skills, commands and a
+  PNG icon: no hooks, no scripts, no SVG.
+- New skill `alisx:dbd`: the Define, Build, Deploy primer, the workspace layout and package
+  ids, the steps that still need the `alis` CLI, and what never happens without the person
+  (production, destructive skill changes, sending secrets). `alisx:discover` now asks once
+  after a loaded skill's work whether it helped.
+- New plugin `alisx-hooks` (this marketplace only, depends on `alisx`): the hooks from 0.1.1.
+  Its session start injects a copy of the `dbd` skill (`scripts/sync-primer.sh`) and states
+  whether the CLI is installed.
+
 ## [0.1.1] - 2026-11-16
 
 Changes from the plugin directory's first review.

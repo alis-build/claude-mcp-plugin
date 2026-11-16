@@ -10,14 +10,39 @@
       "displayName": "AlisX",
       "source": "./plugins/alisx",
       "description": "Connect Claude to Alis Build through the Alis MCP server: the Skill store and your conversations with specialists.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "author": {
         "name": "AlisX"
       },
       "homepage": "https://github.com/alis-build/claude-mcp-plugin",
       "repository": "https://github.com/alis-build/claude-mcp-plugin",
       "license": "MIT",
-      "keywords": ["alis", "alisx", "mcp", "skills", "deploys"],
+      "keywords": [
+        "alis",
+        "alisx",
+        "mcp",
+        "skills",
+        "deploys"
+      ],
+      "category": "developer-tools"
+    },
+    {
+      "name": "alisx-hooks",
+      "displayName": "AlisX hooks",
+      "source": "./plugins/alisx-hooks",
+      "description": "Claude Code hooks for AlisX: Alis Build session context, wake-word routing, a gate on destructive Alis Build calls, secret warnings and skill feedback prompts. Installs alisx too.",
+      "version": "0.2.0",
+      "author": {
+        "name": "AlisX"
+      },
+      "homepage": "https://github.com/alis-build/claude-mcp-plugin",
+      "repository": "https://github.com/alis-build/claude-mcp-plugin",
+      "license": "MIT",
+      "keywords": [
+        "alis",
+        "alisx",
+        "hooks"
+      ],
       "category": "developer-tools"
     }
   ]

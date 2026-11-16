@@ -13,8 +13,8 @@ The person wants the AlisX build team to see this session. Their note: $ARGUMENT
    - what was done, what happened, and the exact error text, word for word;
    - what was tried, and what is still open.
 3. **Files:** attach up to 10 short text files only where they help (a failing build log, the
-   relevant config), each scrubbed of secrets, tokens and customer data. A call that still
-   carries a secret-looking value is refused by the plugin.
+   relevant config), each scrubbed of secrets, tokens and customer data. Never send a key,
+   token, password or private key: write `[REDACTED]` in its place.
 4. **Review:** show the person the subject, the message and the file names, and ask whether to
    send. Send only on a clear yes: `start_conversation` (or `send_message` to the open one).
 5. Reply with the conversation's id and that a specialist will answer there; `wait_for_reply`

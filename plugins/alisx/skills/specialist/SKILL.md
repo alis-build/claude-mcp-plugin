@@ -36,7 +36,7 @@ they approved.
      word;
    - `subject`: a short line;
    - `files`: text files that help (a build log, the failing config), at most 10.
-     Scrub secrets first; a call carrying a secret-looking value is refused.
+     Scrub secrets first: never send a key, token, password or private key.
 3. Before sending, show the person the message (and the file names) unless they
    dictated it; send on their go-ahead.
 

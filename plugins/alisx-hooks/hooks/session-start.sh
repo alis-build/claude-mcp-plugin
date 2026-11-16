@@ -2,12 +2,13 @@
 # SessionStart: what Claude should know about Alis Build before the first
 # prompt, as one additionalContext.
 #
-#   1. The primer (context/primer.md) inside Alis Build work: an ~/alis.build
-#      workspace, or a Go module that uses Alis-defined packages. Elsewhere,
-#      and on resume, compact and fork (which already carried the primer once),
-#      the short digest (context/digest.md).
-#   2. How Define/Build/Deploy steps the MCP server does not cover yet are run:
-#      context/cli.md when the alis CLI is on PATH, context/no-cli.md when not.
+#   1. The primer (context/primer.md, a copy of the alisx plugin's alisx:dbd
+#      skill kept by scripts/sync-primer.sh) inside Alis Build work: an
+#      ~/alis.build workspace, or a Go module that uses Alis-defined packages.
+#      Elsewhere, and on resume, compact and fork (which already carried the
+#      primer once), the short digest (context/digest.md).
+#   2. Whether the alis CLI is on this machine, which decides how the steps the
+#      MCP server does not cover yet are run (the primer says both ways).
 #   3. Inside an ~/alis.build/<org>/{build,define}/... service folder, the
 #      package id and where its other half (contract or implementation) lives.
 #
@@ -62,16 +63,15 @@ if [ "$want" != off ]; then
   [ "$want" = digest ] && [ -f "$ctx_dir/digest.md" ] && primer="$ctx_dir/digest.md"
   [ -f "$primer" ] && context="$(cat "$primer")"
 
-  # 2. The CLI, or what to do without it.
+  # 2. The CLI, as a fact.
   if has_cli; then
-    [ -f "$ctx_dir/cli.md" ] && context="$context
-
-$(cat "$ctx_dir/cli.md")"
+    cli_fact="The alis CLI is on this machine: steps no MCP tool covers yet run through it."
   else
-    [ -f "$ctx_dir/no-cli.md" ] && context="$context
-
-$(cat "$ctx_dir/no-cli.md")"
+    cli_fact="The alis CLI is not on this machine: name a step no MCP tool covers yet and its command, never improvise it."
   fi
+  context="$context
+
+$cli_fact"
 fi
 
 # 3. The service this session opened in, from the workspace layout:

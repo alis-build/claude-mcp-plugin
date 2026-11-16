@@ -2,31 +2,22 @@
 
 Connect Claude to [Alis Build](https://alisx.com). The plugin adds the Alis Build MCP
 server (`https://mcp.alisx.com`), signed in as you, so Claude can find and follow the
-platform's skills and carry on your conversations with Alis Build specialists. It
-also teaches Claude the Define, Build, Deploy workflow, routes "alis, …" requests to
-the right skill, asks you before destructive Alis actions and warns when a secret
-lands in the conversation.
+platform's skills and carry on your conversations with Alis Build specialists. Its
+skills teach Claude the Define, Build, Deploy workflow, how to pick the right skill
+for a task, how to save new work as a skill, and how to ask a specialist for help.
 
 The MCP server is growing to cover what the `alis` CLI does. Today it serves the
-Skill store and specialist conversations (21 tools); new tools appear in the plugin
-as soon as the server offers them, with no plugin update.
+Skill store and specialist conversations (21 tools); new tools appear in Claude as
+soon as the server offers them, with no plugin update.
 
 ## Install
 
-In Claude Code (terminal, desktop app or web):
+In the Claude app (Chat, Cowork, and the desktop Code tab), install AlisX from the
+plugin directory. In Claude Code:
 
 ```text
 /plugin install alisx --marketplace alis-build/claude-mcp-plugin
 ```
-
-or, step by step:
-
-```sh
-claude plugin marketplace add alis-build/claude-mcp-plugin
-claude plugin install alisx@alisx
-```
-
-In the Claude app (Chat and Cowork), install AlisX from the plugin directory.
 
 ## Sign in
 
@@ -35,31 +26,29 @@ identity service (`identity.alisx.com`) and approve what Claude may do: read and
 write skills, and read and write your specialist conversations. Claude identifies
 itself to Alis, so nothing needs setting up first.
 
+- **Chat and Cowork:** open Customize → Connectors and connect Alis Build.
 - **Claude Code (terminal, desktop Code tab):** run `/mcp`, choose `plugin:alisx:alis`
   and Authenticate.
 - **Claude Code on the web:** connect Alis Build at claude.ai, Customize → Connectors;
   web sessions use that sign-in.
-- **Chat and Cowork:** open Customize → Connectors and connect Alis Build.
 
 A sign-in lasts while you use it (it ends after seven days unused, or 90 days in
 all). Disconnect it from the same menu.
 
 ## What you get
 
-| | Chat | Cowork | Claude Code |
-| --- | --- | --- | --- |
-| The Alis Build MCP server (skills, conversations) | ✓ (Connectors) | ✓ | ✓ |
-| Skills: `discover`, `capture`, `specialist` | ✓ | ✓ | ✓ |
-| Commands: `/alisx:status`, `/alisx:conversations`, `/alisx:share`, `/alisx:feedback` | as skills | ✓ | ✓ |
-| Hooks: context, routing, permission gate, secret warnings | — | ✓ | ✓ |
-
 ### Skills
 
+- **`alisx:dbd`**: how Alis Build works. It covers Define, Build and Deploy, where
+  contracts and services live and how a package id is formed. It also says which steps
+  still need the `alis` CLI and what Claude never does without you: production changes,
+  destructive skill changes, sending secrets.
 - **`alisx:discover`** finds the right Skill store skill for platform-shaped work
   (services, `.proto` contracts and Define, Spanner, Pub/Sub, Terraform under `infra/`,
-  packages, playground tests, ADK agents, sharing a page) with `search_skills`, loads it
-  only when its description clearly fits, and lets it lead. Generic coding gets no
-  search, and a miss is silent.
+  packages, playground tests, ADK agents, sharing a page) with `search_skills`. It loads
+  a skill only when its description clearly fits, then lets it lead. When the work is
+  done, Claude asks you once whether the skill helped, and passes your answer to its
+  owner. Generic coding gets no search, and a miss is silent.
 - **`alisx:capture`**: say "capture this as a skill" after solving something new.
   Claude checks for an existing skill, agrees the id and scope with you once, drafts
   the files, shows you the outline and publishes with `create_skill` only when you
@@ -80,64 +69,30 @@ all). Disconnect it from the same menu.
   names, and sends only when you say yes. The transcript itself is not attached.
 - `/alisx:feedback [skill] <message>`: tell a skill's owner how it did.
 
-### Hooks (Claude Code and Cowork)
+In Chat, commands work as skills: Claude uses one when your request fits it.
 
-Every hook is a small bash script in `hooks/`. None of them makes a network call;
-the only data that leaves your machine goes through the MCP server's tools, which
-Claude calls (see below).
+### Claude Code hooks (optional, separate plugin)
 
-- **Session start** (`session-start.sh`): adds the Define, Build, Deploy primer to
-  the session. You get the full primer inside an `~/alis.build` workspace or a Go
-  module that uses Alis packages, and a short digest elsewhere and after
-  resume or compact. It also says whether the `alis` CLI is on this machine.
-  Inside a `~/alis.build/<org>/build|define/…` service folder, it adds the package id
-  and where the contract or implementation lives. `ALIS_PRIMER=full|digest|off`
-  overrides the choice.
-- **Prompt routing** (`route-prompt.sh`): a prompt that starts with "alis, …" or
-  "hey alis", or says "ask alis to …", goes to `alisx:discover`. "Capture this as a
-  skill" goes to `alisx:capture`. A `tickets/<id>` reference is read before
-  anything is proposed. In plan mode on platform work, Claude searches the Skill
-  store once. The matching is local, and other prompts get nothing.
-- **Permission gate** (`gate-tools.sh`): this hook only ever asks you or refuses a
-  call; it never grants one. Writes the server marks destructive (`update_skill`,
-  `restore_skill_version`, `delete_skill`) always ask you, in every permission mode.
-  So does any call whose arguments ask for production, a reveal or a forced change.
-  A call whose arguments carry a secret-looking value is refused, so Claude takes the
-  value out before anything is sent. In Claude Code, a tool the server adds later asks
-  you when its name says it deploys, removes or touches secrets. Everything else,
-  reads included, keeps Claude's normal permission prompt. To stop being asked about
-  reads, choose "always allow" when Claude asks, or add the read tools to
-  `permissions.allow` in your settings.
-- **Secret warnings** (`warn-secrets.sh`): after each tool call, the result and
-  arguments are checked for secret-looking values. These include Stripe, GitHub, npm,
-  PyPI, Linear, SendGrid, AWS, Google, Slack, Anthropic and OpenAI keys, private keys,
-  connection strings with passwords and `NAME=value` lines whose name says secret.
-  Claude is told the kinds found and not to repeat them, and you see one line
-  saying they may need rotating. Values never appear in either. A hash of each value
-  is kept for a day in the plugin's data folder, so each is reported once per
-  session. `ALISX_SECRETS=off` turns this off.
-- **Skill feedback** (`note-skill.sh`): when a Skill store skill is loaded, Claude
-  asks you once, after the work it guided, whether it helped, and sends your answer
-  to its owner with `send_skill_feedback` only if you give one.
+The `alisx-hooks` plugin, from this plugin's GitHub marketplace, adds hooks for Claude
+Code. It injects the `alisx:dbd` primer and the service you opened at session start,
+and routes "alis, …" to `alisx:discover`. It also asks before destructive Alis Build
+calls, refuses calls that carry a secret, and warns when a secret appears in a tool's
+output. It is not part of this directory listing:
 
-### With the `alis` CLI and its plugin
-
-The `alis` CLI's own Claude Code plugin (`alis@alis`) runs Define, Build and Deploy
-from the terminal. When it is enabled, AlisX steps aside for the primer, routing and
-secret warnings, and keeps the MCP server and its permission gate. If the CLI is
-installed without its plugin, the first session says once how to add it.
+```sh
+claude plugin marketplace add alis-build/claude-mcp-plugin
+claude plugin install alisx-hooks@alisx
+```
 
 ## Data and privacy
 
 - **Sent to Alis Build:** what Claude passes to the MCP server's tools, signed in as
   you: search queries, skill ids, skill files you publish, feedback, and messages
-  and files you send to specialists. Writes keep Claude's permission prompt or always
-  ask, as above. Specialists read what you send them.
-- **Not sent:** your prompts (the routing is local), files on disk, tool output and
-  the session transcript. The hooks make no network calls.
-- **Kept locally:** under the plugin's data folder, the hashes of reported secrets,
-  the ids of skills already asked about (both removed after a day) and a marker that
-  the CLI notice was shown.
+  and files you send to specialists. Specialists read what you send them. Claude's
+  normal permission prompts apply to each tool call.
+- **Not sent:** your prompts, files on disk and the session transcript, except what
+  Claude puts into a tool call. This plugin has no hooks or scripts; it runs nothing
+  on your machine.
 
 Alis Build's [privacy policy](https://alisx.com/privacy-policy/) and
 [terms of use](https://alisx.com/terms-of-use/) apply to the service.
@@ -146,9 +101,6 @@ Alis Build's [privacy policy](https://alisx.com/privacy-policy/) and
 
 - **Alis tools missing, or asking to sign in:** sign in as above, then retry. In
   Claude Code, `/mcp` shows the server's state.
-- **No primer or routing:** check that AlisX is enabled in `/plugin`. If you installed
-  it during a session, run `/reload-plugins`. `ALIS_PRIMER=off` turns the primer off
-  on purpose.
 - **A step needs the `alis` CLI:** Define, Build and Deploy run through the CLI until
   the MCP server covers them. Without it, Claude names the step and the exact command
   instead of improvising one.

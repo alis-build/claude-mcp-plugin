@@ -36,12 +36,19 @@ discovery, and no narration when nothing fits.
    Read files it names with `read_skill_file`. A long skill comes in parts: call
    `load_skill` again with the `offset` it gives.
 
-5. **When a skill's step needs something this session cannot do** (for example an
+5. **Ask how it went, once.** When the work the skill guided is done (not before),
+   ask the person in one short line whether it helped. If they answer, send it to the
+   skill's owner with `send_skill_feedback` (`rating` up or down, their words as
+   `feedback`); if they don't, drop it. Skills improve from what their users say.
+
+6. **When a skill's step needs something this session cannot do** (for example an
    `alis` CLI command on a machine without the CLI), say which step and the exact
    command, and carry on with the steps that can be done here.
 
 ## Rules
 
+- New to Alis Build work in this session? Read `alisx:dbd` first: it says how the
+  platform works and what never happens without the person.
 - Discovery runs at most once per task: after a miss, do not search again on
   follow-up prompts about the same piece of work.
 - If the person asked for a skill and nothing fits, say so and offer `request_skill`

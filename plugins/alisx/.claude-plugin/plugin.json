@@ -1,8 +1,8 @@
 {
   "name": "alisx",
   "displayName": "AlisX",
-  "version": "0.1.1",
-  "description": "Connect Claude to Alis Build: the AlisX Skill store and your conversations with Alis Build specialists through the Alis MCP server, with Define/Build/Deploy context, skill routing, a permission gate and secret warnings.",
+  "version": "0.2.0",
+  "description": "Connect Claude to Alis Build: the AlisX Skill store and your conversations with Alis Build specialists through the Alis MCP server, with skills for the Define, Build, Deploy workflow, finding and capturing skills, and asking a specialist.",
   "author": {
     "name": "AlisX",
     "url": "https://alisx.com"
@@ -14,7 +14,7 @@
   "privacyPolicyUrl": "https://alisx.com/privacy-policy/",
   "termsOfServiceUrl": "https://alisx.com/terms-of-use/",
   "license": "MIT",
-  "icon": "./assets/alis-mark.svg",
+  "icon": "./assets/icon.png",
   "keywords": [
     "alis",
     "alisx",

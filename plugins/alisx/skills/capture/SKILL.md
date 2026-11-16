@@ -40,8 +40,8 @@ Everything goes through the Alis MCP server; a skill is published from its files
      what search matches, so write it for both.
    - Parameterise specifics: `<org>`, `<product>`, `<service>`, `<env>`.
    - Scrub: home and absolute paths, emails, build environment and project ids,
-     tokens and keys, internal URLs. A call carrying a secret-looking value is
-     refused by the plugin anyway.
+     tokens and keys, internal URLs. Never publish a secret: skills are read by
+     everyone they are shared with.
    - Optionally `references/<topic>.md` for a scrubbed worked example.
    - **Code is not a reference.** If the practice needs a buildable foundation (a
      template tree, a Dockerfile, Terraform, a server), say that it belongs in a code

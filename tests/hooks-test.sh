@@ -7,7 +7,7 @@
 set -u
 
 repo="$(cd "$(dirname "$0")/.." && pwd)"
-plugin="$repo/plugins/alisx"
+plugin="$repo/plugins/alisx-hooks"
 hooks="$plugin/hooks"
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/alisx-test.XXXXXX")"
 trap 'rm -rf "$tmp"' EXIT
@@ -62,7 +62,7 @@ out="$(start startup | run session-start.sh "$nocli" "$tmp/plain")"
 c="$(printf '%s' "$out" | ctx)"
 expect_contains "plain folder gets the digest" "$c" "# Alis Build — refresher"
 expect_absent   "plain folder: not the full primer" "$c" "## Define — lock"
-expect_contains "no CLI: says what to do without it" "$c" "## Without the \`alis\` CLI"
+expect_contains "no CLI: says what to do without it" "$c" "The alis CLI is not on this machine"
 expect_absent   "no CLI: no notice" "$out" "systemMessage"
 
 c="$(start startup | run session-start.sh "$nocli" "$ws/build/shop/orders/v1/internal" | ctx)"
@@ -89,7 +89,7 @@ out="$(start startup | run session-start.sh "$nocli" "$tmp/plain" ALIS_PRIMER=of
 expect_eq "ALIS_PRIMER=off outside a service says nothing" "$out" ""
 
 out="$(start startup | run session-start.sh "$withcli" "$tmp/plain")"
-expect_contains "CLI: its commands" "$(printf '%s' "$out" | ctx)" "## The \`alis\` CLI is on this machine"
+expect_contains "CLI: its commands" "$(printf '%s' "$out" | ctx)" "The alis CLI is on this machine:"
 expect_contains "CLI without its plugin: one notice" "$(printf '%s' "$out" | jq -r '.systemMessage // empty')" "claude plugin install alis@alis"
 out="$(start startup | run session-start.sh "$withcli" "$tmp/plain")"
 expect_absent "the notice is said once per install" "$out" "systemMessage"
