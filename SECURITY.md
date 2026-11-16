@@ -24,3 +24,6 @@ In scope, for this plugin:
 
 Out of scope here: the Alis Build MCP server, the platform and Claude itself. Report those
 to their owners ([Alis Build support](https://console.alisx.com/support) for the platform).
+That includes the cards Claude on the web and Desktop draws under a tool call: they are the
+MCP server's, and a press on one is the person's own decision, made in Claude and outside
+this plugin's hooks.
